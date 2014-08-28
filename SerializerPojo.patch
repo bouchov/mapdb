@@ -1,0 +1,52 @@
+Index: src/main/java/org/mapdb/SerializerPojo.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/org/mapdb/SerializerPojo.java	(revision fdd0ebb89af7c5d3e67965350cb414a3901e62e6)
++++ src/main/java/org/mapdb/SerializerPojo.java	(revision )
+@@ -239,9 +239,6 @@
+ 
+ 
+     public void registerClass(Class<?> clazz) throws IOException {
+-        if(clazz != Object.class)
+-            assertClassSerializable(clazz);
+-
+         if (containsClass(clazz))
+             return;
+ 
+@@ -389,6 +386,9 @@
+             if( !clazz.isEnum() && clazz.getSuperclass()!=null && clazz.getSuperclass().isEnum())
+                 clazz = clazz.getSuperclass();
+ 
++            if(clazz != Object.class)
++                assertClassSerializable(clazz);
++
+             registerClass(clazz);
+ 
+             //write class header
+@@ -601,8 +601,11 @@
+                 classId = class2classId.get(desc.forClass());
+             }
+             DataOutput2.packInt(this,classId);
++            if (!Serializable.class.isAssignableFrom(desc.forClass())) {
++                super.writeClassDescriptor(desc);
+-        }
+-    }
++            }
++        }
++    }
+ 
+     protected final class ObjectInputStream2 extends ObjectInputStream{
+ 
+@@ -614,6 +617,9 @@
+         protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
+             Integer classId = DataInput2.unpackInt(this);
+             Class clazz = classId2class.get(classId);
++            if (!Serializable.class.isAssignableFrom(clazz)) {
++                return super.readClassDescriptor();
++            }
+             return ObjectStreamClass.lookup(clazz);
+         }
+ 
+\ No newline at end of file
