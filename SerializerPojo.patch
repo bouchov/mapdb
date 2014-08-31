@@ -25,28 +25,13 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
              registerClass(clazz);
  
              //write class header
-@@ -601,8 +601,11 @@
-                 classId = class2classId.get(desc.forClass());
-             }
-             DataOutput2.packInt(this,classId);
-+            if (!Serializable.class.isAssignableFrom(desc.forClass())) {
-+                super.writeClassDescriptor(desc);
--        }
--    }
-+            }
-+        }
-+    }
- 
-     protected final class ObjectInputStream2 extends ObjectInputStream{
- 
-@@ -614,6 +617,9 @@
+@@ -614,7 +614,7 @@
          protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
              Integer classId = DataInput2.unpackInt(this);
              Class clazz = classId2class.get(classId);
-+            if (!Serializable.class.isAssignableFrom(clazz)) {
-+                return super.readClassDescriptor();
-+            }
-             return ObjectStreamClass.lookup(clazz);
+-            return ObjectStreamClass.lookup(clazz);
++            return ObjectStreamClass.lookupAny(clazz);
          }
  
+         @Override
 \ No newline at end of file
