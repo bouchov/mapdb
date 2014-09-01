@@ -22,6 +22,20 @@ public class SerializerPojoTest2 extends TestCase {
         public Pojo2(Class classVal) {
             this.classVal = classVal;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Pojo2 pojo2 = (Pojo2) o;
+            return classVal.equals(pojo2.classVal);
+        }
+
+        @Override
+        public int hashCode() {
+            return classVal.hashCode();
+        }
     }
 
     public static class Pojo implements Serializable {
@@ -49,6 +63,21 @@ public class SerializerPojoTest2 extends TestCase {
                 throw new IOException("Unknown class version (" + ver + ')');
             }
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Pojo pojo = (Pojo) o;
+
+            return pojo2Val.equals(pojo.pojo2Val);
+        }
+
+        @Override
+        public int hashCode() {
+            return pojo2Val.hashCode();
+        }
     }
 
     public static class SimplePojo implements Serializable {
@@ -60,6 +89,21 @@ public class SerializerPojoTest2 extends TestCase {
 
         public Pojo2 getPojo2Val() {
             return pojo2Val;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            SimplePojo that = (SimplePojo) o;
+
+            return pojo2Val.equals(that.pojo2Val);
+        }
+
+        @Override
+        public int hashCode() {
+            return pojo2Val.hashCode();
         }
     }
 
@@ -78,5 +122,7 @@ public class SerializerPojoTest2 extends TestCase {
     private void serialize(Object i) throws IOException {
         DataOutput2 in = new DataOutput2();
         p.serialize(in, i);
+        Object j = p.deserialize(new DataInput2(in.buf), 1);
+        assertEquals(i,j);
     }
 }
